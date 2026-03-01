@@ -278,42 +278,6 @@ StyledPopup {
             }
         }
 
-        // OpenClaw token usage
-        ColumnLayout {
-            id: openclawSection
-            property var oc: AIBar.getTool("openclaw")
-            visible: oc !== null
-            spacing: 2
-            Layout.fillWidth: true
-            Layout.topMargin: 4
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: Appearance.colors.colSurfaceBright ?? Appearance.m3colors.m3outlineVariant ?? "#3a3a3a"
-            }
-
-            RowLayout {
-                spacing: 8
-                Layout.fillWidth: true
-
-                StyledText {
-                    text: "OpenClaw"
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnSurfaceVariant
-                }
-
-                Item { Layout.fillWidth: true }
-
-                StyledText {
-                    text: root.formatTokens(openclawSection.oc?.tokensIn ?? 0) + " in / " + root.formatTokens(openclawSection.oc?.tokensOut ?? 0) + " out"
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colOnSurfaceVariant
-                }
-            }
-        }
-
         // Footer: last update time
         StyledText {
             Layout.alignment: Qt.AlignRight

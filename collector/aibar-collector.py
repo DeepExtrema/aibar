@@ -212,6 +212,7 @@ def parse_claude(data_dir: Path) -> dict:
                             sub_type = attrs_raw.get("subscriptionType")
                             if sub_type:
                                 plan = sub_type.capitalize()
+                                break
             except OSError:
                 continue
             if plan:
@@ -318,7 +319,7 @@ def parse_claude(data_dir: Path) -> dict:
             settings = json.load(f)
         model_val = settings.get("model")
         if model_val and isinstance(model_val, str):
-            result["activeModel"] = model_val.capitalize()
+            result["activeModel"] = _friendly_name(model_val)
     except (json.JSONDecodeError, OSError):
         pass
 

@@ -273,7 +273,14 @@ def parse_claude(data_dir: Path) -> dict:
             if family in model_id:
                 parts = model_id.split(f"{family}-", 1)
                 if len(parts) == 2:
-                    ver = parts[1].split("-")[0].replace("-", ".")
+                    segments = parts[1].split("-")
+                    ver_parts = []
+                    for seg in segments:
+                        if len(seg) <= 2 and seg.isdigit():
+                            ver_parts.append(seg)
+                        else:
+                            break
+                    ver = ".".join(ver_parts) if ver_parts else parts[1].split("-")[0]
                     return f"{family.capitalize()} {ver}"
         return model_id
     model_totals: dict[str, dict] = {}

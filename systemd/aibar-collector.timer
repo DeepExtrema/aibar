@@ -1,0 +1,10 @@
+[Unit]
+Description=AIBar collector timer
+
+[Timer]
+OnBootSec=10s
+OnUnitActiveSec=30s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

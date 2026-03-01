@@ -78,7 +78,7 @@ def is_process_active(process_names: list[str]) -> bool:
     for name in process_names:
         try:
             result = subprocess.run(
-                ["pgrep", "-f", name],
+                ["pgrep", "-x", name],
                 capture_output=True,
                 timeout=5,
             )
@@ -140,7 +140,7 @@ def fetch_claude_usage(data_dir: Path) -> dict | None:
         if util is None:
             continue
         resets_at = raw.get("resets_at", "")
-        if resets_at and "+" in resets_at:
+        if resets_at and not resets_at.endswith("Z"):
             try:
                 dt = datetime.fromisoformat(resets_at)
                 resets_at = dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -186,7 +186,7 @@ def parse_claude(data_dir: Path) -> dict:
         for tfile in reversed(telem_files):
             try:
                 with open(tfile, "r") as f:
-                    for line in reversed(f.readlines()):
+                    for line in f:
                         line = line.strip()
                         if not line:
                             continue
@@ -212,7 +212,6 @@ def parse_claude(data_dir: Path) -> dict:
                             sub_type = attrs_raw.get("subscriptionType")
                             if sub_type:
                                 plan = sub_type.capitalize()
-                                break
             except OSError:
                 continue
             if plan:
@@ -267,6 +266,16 @@ def parse_claude(data_dir: Path) -> dict:
         "claude-sonnet-4-6": "Sonnet 4.6",
         "claude-haiku-4-5-20251001": "Haiku 4.5",
     }
+    def _friendly_name(model_id: str) -> str:
+        if model_id in MODEL_FRIENDLY:
+            return MODEL_FRIENDLY[model_id]
+        for family in ("opus", "sonnet", "haiku"):
+            if family in model_id:
+                parts = model_id.split(f"{family}-", 1)
+                if len(parts) == 2:
+                    ver = parts[1].split("-")[0].replace("-", ".")
+                    return f"{family.capitalize()} {ver}"
+        return model_id
     model_totals: dict[str, dict] = {}
     for proj_data in projects.values():
         if not isinstance(proj_data, dict):
@@ -288,7 +297,7 @@ def parse_claude(data_dir: Path) -> dict:
         for mid, mt in sorted(model_totals.items(), key=lambda x: x[1]["cost"], reverse=True):
             models.append({
                 "id": mid,
-                "name": MODEL_FRIENDLY.get(mid, mid),
+                "name": _friendly_name(mid),
                 "tokensIn": mt["tokensIn"],
                 "tokensOut": mt["tokensOut"],
                 "cost": round(mt["cost"], 4),
